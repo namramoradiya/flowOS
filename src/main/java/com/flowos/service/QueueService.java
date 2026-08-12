@@ -13,11 +13,13 @@ import com.flowos.repository.BranchRepository;
 import com.flowos.repository.CounterRepository;
 import com.flowos.repository.CustomerRepository;
 import com.flowos.repository.QueueTokenRepository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Service
 public class QueueService {
     private static final int MINUTES_PER_PERSON_ESTIMATE=5;
 
