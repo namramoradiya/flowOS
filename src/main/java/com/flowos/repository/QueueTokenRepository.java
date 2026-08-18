@@ -16,24 +16,29 @@ import java.util.UUID;
 
 public interface QueueTokenRepository extends JpaRepository<QueueToken, UUID> {
 
-    // the live queue for a branch - oldest first, this IS what staff/customers see
-    List<QueueToken> findByBranchIdAndStatusOrderByJoinedAtAsc(UUID branchId, TokenStatus status);
+    // was: findByBranchIdAndStatusOrderByJoinedAtAsc(branchId, status) - no date filter
+    List<QueueToken> findByBranchIdAndTokenDateAndStatusOrderByJoinedAtAsc(
+            UUID branchId, LocalDate tokenDate, TokenStatus status);
 
-    // next token number to allocate - see explanation below
     @Query("""
         SELECT COALESCE(MAX(q.tokenNumber), 0) FROM QueueToken q
         WHERE q.branch.id = :branchId AND q.tokenDate = :date
     """)
     Integer findMaxTokenNumberForBranchAndDate(@Param("branchId") UUID branchId, @Param("date") LocalDate date);
 
-    // how many WAITING people are ahead of a given joinedAt timestamp
+    // now scoped to a specific day, not "any day, ever"
     @Query("""
         SELECT COUNT(q) FROM QueueToken q
-        WHERE q.branch.id = :branchId AND q.status = 'WAITING' AND q.joinedAt < :joinedAt
+        WHERE q.branch.id = :branchId AND q.tokenDate = :date
+        AND q.status = 'WAITING' AND q.joinedAt < :joinedAt
     """)
-    long countWaitingAhead(@Param("branchId") UUID branchId, @Param("joinedAt") LocalDateTime joinedAt);
+    long countWaitingAhead(
+            @Param("branchId") UUID branchId,
+            @Param("date") LocalDate date,
+            @Param("joinedAt") LocalDateTime joinedAt);
 
-    // "Call Next" - locks the row so two staff can't call the same token at once
+    // was: findFirstByBranchIdAndStatusOrderByJoinedAtAsc(branchId, status) - no date filter
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<QueueToken> findFirstByBranchIdAndStatusOrderByJoinedAtAsc(UUID branchId, TokenStatus status);
+    Optional<QueueToken> findFirstByBranchIdAndTokenDateAndStatusOrderByJoinedAtAsc(
+            UUID branchId, LocalDate tokenDate, TokenStatus status);
 }

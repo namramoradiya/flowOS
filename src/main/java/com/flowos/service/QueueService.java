@@ -83,7 +83,7 @@ public class QueueService {
 
     private QueueStatusResponse toStatusresponse(QueueToken token){
         long peopleAhead=token.getStatus() == TokenStatus.WAITING ?
-                queueTokenRepository.countWaitingAhead(token.getBranch().getId(),token.getJoinedAt()) :0;
+                queueTokenRepository.countWaitingAhead(token.getBranch().getId(),token.getTokenDate(),token.getJoinedAt()) :0;
 
         int activeCounters=Math.max(counterRepository.findByBranchIdAndIsActiveTrue(token.getBranch().getId()).size(),1
         );
