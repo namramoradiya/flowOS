@@ -41,4 +41,6 @@ public interface QueueTokenRepository extends JpaRepository<QueueToken, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<QueueToken> findFirstByBranchIdAndTokenDateAndStatusOrderByJoinedAtAsc(
             UUID branchId, LocalDate tokenDate, TokenStatus status);
+
+    List<QueueToken> findByBranchIdAndTokenDate(UUID branchId, LocalDate today);
 }
